@@ -1,0 +1,54 @@
+# ============================================================================
+# FIXED REQUIREMENTS - NO HTTPX CONFLICTS
+# ============================================================================
+# This version uses deep-translator instead of googletrans to avoid conflicts
+# ============================================================================
+
+# Core FastAPI
+fastapi==0.104.1
+uvicorn==0.24.0
+python-multipart==0.0.6
+
+# AI Models - HuggingFace & Transformers
+transformers==4.36.2
+torch==2.1.2
+sentencepiece==0.1.99
+tokenizers>=0.15.0
+
+# Google Gemini
+google-generativeai>=0.3.0
+
+# NLP Processing
+spacy==3.7.2
+nltk==3.8.1
+
+# ============================================================================
+# MULTILINGUAL SUPPORT - FIXED (NO GOOGLETRANS)
+# ============================================================================
+# Using deep-translator instead of googletrans to avoid httpx version conflicts
+deep-translator==1.11.4
+langdetect==1.0.9
+# ============================================================================
+
+# Evaluation Metrics
+rouge-score==0.1.2
+
+# Document Processing
+python-docx==1.1.0
+pypdf==3.17.4
+
+# Speech Recognition
+openai-whisper==20231117
+
+# Utilities
+numpy>=1.24.0,<2.0.0
+requests>=2.31.0
+
+# HTTP Client - Compatible version for all packages
+httpx>=0.25.0,<1.0.0
+httpcore>=0.18.0
+h11>=0.14.0
+
+# Additional dependencies
+pydantic>=2.0.0
+typing-extensions>=4.5.0

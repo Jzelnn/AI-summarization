@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NLP Summarizer + Evaluation + Multilingual</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <header>
+    <div class="language-switch">
+      <button class="lang-btn active" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="id">ID</button>
+      <button class="lang-btn" data-lang="jp">JP</button>
+      <button class="lang-btn" data-lang="cn">CN</button>
+    </div>
+
+    <h1>🚀 AI NLP Summarizer</h1>
+    <p>With Evaluation Metrics & Multilingual Support</p>
+
+    <button id="themeToggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+      🌙
+    </button>
+  </header>
+
+  <main class="container">
+
+    <!-- Upload Card -->
+    <section class="card">
+      <h2>📝 Input Text or File</h2>
+
+      <!-- Input Toggle Tabs -->
+      <div class="tabs">
+        <button id="tabTextBtn" class="active" onclick="switchTab('text')">📝 Text Input</button>
+        <button id="tabFileBtn" onclick="switchTab('file')">📁 File / Audio</button>
+      </div>
+
+      <!-- Text Input Area -->
+      <div id="inputTextMessage" class="input-wrapper">
+        <textarea id="textInputArea" placeholder="Type or paste your text here... (supports multiple languages!)" rows="6"></textarea>
+        <button id="micBtn" onclick="startDictation()" class="mic-btn" aria-label="Start Voice Input">
+          🎤
+        </button>
+      </div>
+
+      <!-- File Input Area -->
+      <div id="inputFileMessage" class="hidden">
+        <label class="upload-box">
+          <input type="file" id="fileInput" hidden />
+          <span id="uploadText">📄🎧 Click or drag a file here</span>
+        </label>
+      </div>
+
+      <!-- Language Selection -->
+      <div class="language-selector">
+        <label for="outputLanguage">🌍 Output Language:</label>
+        <select id="outputLanguage">
+          <option value="">Auto-detect (same as input)</option>
+          <option value="en">🇺🇸 English</option>
+          <option value="id">🇮🇩 Indonesian</option>
+          <option value="es">🇪🇸 Spanish</option>
+          <option value="fr">🇫🇷 French</option>
+          <option value="de">🇩🇪 German</option>
+          <option value="ja">🇯🇵 Japanese</option>
+          <option value="zh-CN">🇨🇳 Chinese (Simplified)</option>
+          <option value="ko">🇰🇷 Korean</option>
+          <option value="ar">🇸🇦 Arabic</option>
+          <option value="ru">🇷🇺 Russian</option>
+          <option value="pt">🇧🇷 Portuguese</option>
+        </select>
+      </div>
+
+      <!-- AI Model selector -->
+      <select id="aiModel">
+        <option value="gemini">🚀 Gemini 2.5 Flash</option>
+        <option value="huggingface">🤗 T5-Small (Offline)</option>
+        <option value="compare">⚖️ Compare Both Models</option>
+      </select>
+
+      <select id="summaryLevel">
+        <option value="short">Short Summary</option>
+        <option value="medium">Medium Summary</option>
+        <option value="long">Long Summary</option>
+      </select>
+
+      <div class="action-buttons">
+        <button id="generateBtn" onclick="generate()">Generate Summary</button>
+        <button id="clearBtn" onclick="clearAll()">🗑 Clear All</button>
+      </div>
+      <p id="loadingText" class="hidden">⏳ Processing...</p>
+    </section>
+
+    <!-- Language Detection Result -->
+    <section class="card hidden" id="languageSection">
+      <h2>🌍 Language Detection</h2>
+      <div class="language-info">
+        <p><strong>Detected Language:</strong> <span id="detectedLang"></span></p>
+        <p><strong>Output Language:</strong> <span id="outputLang"></span></p>
+      </div>
+    </section>
+
+    <!-- Result -->
+    <section class="card hidden" id="resultSection">
+      <h2>📄 Summary Result</h2>
+
+      <!-- topic pill -->
+      <div id="topicBadge" class="topic-badge hidden"></div>
+
+      <div class="compare">
+        <div>
+          <h3>Before</h3>
+          <p id="beforeText"></p>
+        </div>
+        <div>
+          <div class="header-with-copy">
+            <h3>After</h3>
+            <button id="btnCopySummary" class="copy-btn-small" onclick="copySummary()">📋 Copy</button>
+          </div>
+          <p id="afterText"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Evaluation Metrics -->
+    <section class="card hidden" id="metricsSection">
+      <h2>📊 Evaluation Metrics</h2>
+      
+      <div class="metrics-grid">
+        <!-- ROUGE Scores -->
+        <div class="metric-card">
+          <h3>ROUGE Scores</h3>
+          <div class="metric-item">
+            <span>ROUGE-1 F1:</span>
+            <div class="metric-bar">
+              <div id="rouge1Bar" class="metric-fill"></div>
+              <span id="rouge1Value">-</span>
+            </div>
+          </div>
+          <div class="metric-item">
+            <span>ROUGE-2 F1:</span>
+            <div class="metric-bar">
+              <div id="rouge2Bar" class="metric-fill"></div>
+              <span id="rouge2Value">-</span>
+            </div>
+          </div>
+          <div class="metric-item">
+            <span>ROUGE-L F1:</span>
+            <div class="metric-bar">
+              <div id="rougeLBar" class="metric-fill"></div>
+              <span id="rougeLValue">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality Metrics -->
+        <div class="metric-card">
+          <h3>Quality Metrics</h3>
+          <div class="metric-item">
+            <span>BLEU Score:</span>
+            <div class="metric-bar">
+              <div id="bleuBar" class="metric-fill"></div>
+              <span id="bleuValue">-</span>
+            </div>
+          </div>
+          <div class="metric-item">
+            <span>Content F1:</span>
+            <div class="metric-bar">
+              <div id="contentF1Bar" class="metric-fill"></div>
+              <span id="contentF1Value">-</span>
+            </div>
+          </div>
+          <div class="metric-item">
+            <span>Entity Preservation:</span>
+            <div class="metric-bar">
+              <div id="entityBar" class="metric-fill"></div>
+              <span id="entityValue">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compression Info -->
+        <div class="metric-card">
+          <h3>Summary Info</h3>
+          <div class="metric-item">
+            <span>Compression Ratio:</span>
+            <strong id="compressionValue">-</strong>
+          </div>
+          <div class="metric-item">
+            <span>Original Words:</span>
+            <strong id="originalWords">-</strong>
+          </div>
+          <div class="metric-item">
+            <span>Summary Words:</span>
+            <strong id="summaryWords">-</strong>
+          </div>
+          <div class="metric-item">
+            <span>Processing Time:</span>
+            <strong id="processingTime">-</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric-legend">
+        <p>📖 <strong>How to interpret:</strong></p>
+        <ul>
+          <li>ROUGE scores: Higher is better (>0.4 is good)</li>
+          <li>BLEU score: Higher is better (>0.3 is good)</li>
+          <li>Content F1: Higher is better (>0.5 is good)</li>
+          <li>Compression: 20-40% is optimal</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Model Comparison -->
+    <section class="card hidden" id="comparisonSection">
+      <h2>⚖️ Model Comparison</h2>
+
+      <div id="topicBadgeCmp" class="topic-badge hidden"></div>
+
+      <div class="comparison-grid">
+        <!-- Gemini column -->
+        <div class="comparison-item">
+          <div class="comparison-header">
+            <h3>🚀 Gemini 2.5 Flash</h3>
+            <span class="model-tag gemini-tag">Cloud AI</span>
+          </div>
+          <div class="header-with-copy">
+            <h4 style="margin:0;">Summary</h4>
+            <button class="copy-btn-small" onclick="copyGeminiSummary()">📋 Copy</button>
+          </div>
+          <p id="geminiSummary" class="summary-text"></p>
+          
+          <!-- Gemini Metrics -->
+          <div class="model-metrics">
+            <h4>Quality Metrics</h4>
+            <div class="mini-metric">
+              <span>ROUGE-1:</span>
+              <span id="geminiRouge1">-</span>
+            </div>
+            <div class="mini-metric">
+              <span>Content F1:</span>
+              <span id="geminiF1">-</span>
+            </div>
+            <div class="mini-metric">
+              <span>BLEU:</span>
+              <span id="geminiBleu">-</span>
+            </div>
+          </div>
+          
+          <div class="model-stats">
+            <span>⏱️ <span id="geminiTime">—</span></span>
+            <span>📝 <span id="geminiWords">—</span> words</span>
+            <span>📊 <span id="geminiRatio">—</span></span>
+          </div>
+        </div>
+
+        <!-- T5-Small column -->
+        <div class="comparison-item">
+          <div class="comparison-header">
+            <h3>🤗 T5-Small</h3>
+            <span class="model-tag huggingface-tag">Local AI</span>
+          </div>
+          <div class="header-with-copy">
+            <h4 style="margin:0;">Summary</h4>
+            <button class="copy-btn-small" onclick="copyHuggingFaceSummary()">📋 Copy</button>
+          </div>
+          <p id="huggingfaceSummary" class="summary-text"></p>
+          
+          <!-- HF Metrics -->
+          <div class="model-metrics">
+            <h4>Quality Metrics</h4>
+            <div class="mini-metric">
+              <span>ROUGE-1:</span>
+              <span id="hfRouge1">-</span>
+            </div>
+            <div class="mini-metric">
+              <span>Content F1:</span>
+              <span id="hfF1">-</span>
+            </div>
+            <div class="mini-metric">
+              <span>BLEU:</span>
+              <span id="hfBleu">-</span>
+            </div>
+          </div>
+          
+          <div class="model-stats">
+            <span>⏱️ <span id="hfTime">—</span></span>
+            <span>📝 <span id="hfWords">—</span> words</span>
+            <span>📊 <span id="hfRatio">—</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Winner Badge -->
+      <div id="winnerBadge" class="winner-badge hidden">
+        🏆 Winner: <span id="winnerModel">-</span>
+      </div>
+
+      <!-- Original reference -->
+      <div class="original-reference">
+        <h4>📄 Original Text</h4>
+        <p id="cmpOriginalText"></p>
+      </div>
+    </section>
+
+    <!-- Entity -->
+    <section class="card hidden" id="entitySection">
+      <div class="header-with-copy">
+        <h2>🏷️ Named Entities</h2>
+        <button id="btnCopyEntities" class="copy-btn-small" onclick="copyEntities()">📋 Copy</button>
+      </div>
+      <ul id="entityList"></ul>
+    </section>
+
+    <!-- Download -->
+    <section class="card hidden" id="downloadSection">
+      <h2>💾 Download Summary</h2>
+      <div class="download-btns">
+        <button onclick="downloadTXT()">📄 TXT</button>
+        <button onclick="downloadDOC()">📘 DOC</button>
+        <button onclick="downloadPDF()">📕 PDF</button>
+      </div>
+      <button id="btnCopyAll" class="copy-all-btn" onclick="copyAll()">📋 Copy All Data</button>
+    </section>
+
+    <!-- History -->
+    <section class="card hidden" id="historySection">
+      <h2>🕒 Recent History</h2>
+      <ul id="historyList"></ul>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Version 3.0.0 - Now with Evaluation Metrics & Multilingual Support! 🎉</p>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+</body>
+
+</html>

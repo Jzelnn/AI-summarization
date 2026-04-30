@@ -1,0 +1,16 @@
+# Project Handoff - Backend is working (akbar)
+
+## Current Status
+- FastAPI backend working
+- File upload (TXT, PDF, DOCX) implemented
+- Endpoint: POST /upload
+
+## Folder Uses:
+- input/ → speech & file processing
+- nlp/ → NER, topics, summarization
+- main.py → API wiring only
+
+## Rules
+- Do not modify existing functions without discussion
+- Work only in your assigned folder
+- All work must be in a separate Git branch
